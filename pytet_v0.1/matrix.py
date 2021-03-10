@@ -1,12 +1,13 @@
 class MatrixError(Exception):
     pass
 
+
 class Matrix:
     count = 0
 
     def get_count(self):
         return Matrix.count
-    
+
     def get_dy(self):
         return self._dy
 
@@ -22,7 +23,7 @@ class Matrix:
         self._dy = cy
         self._dx = cx
         self._array = [[0]*self._dx for i in range(self._dy)]
-        
+
     def __init__(self, arg):
         Matrix.count += 1
         if isinstance(arg, list):
@@ -57,18 +58,18 @@ class Matrix:
             for x in range(self._dx-1):
                 print(self._array[y][x], end=', ')
             print(self._array[y][self._dx-1], end=' ')
-            print('],') # , end=' ')
+            print('],')  # , end=' ')
         print('[', end=' ')
         for x in range(self._dx-1):
             print(self._array[self._dy-1][x], end=', ')
         print(self._array[self._dy-1][self._dx-1], end=' ')
-        print(']') # , end=' ')
-        print(']')        
+        print(']')  # , end=' ')
+        print(']')
 
     def clip(self, top, left, bottom, right):
         cy = bottom - top
         cx = right - left
-        temp = [[0]*cx for i in range(cy)]       
+        temp = [[0]*cx for i in range(cy)]
         for y in range(cy):
             for x in range(cx):
                 if (top+y >= 0) and (left+x >= 0) \
@@ -93,7 +94,7 @@ class Matrix:
         temp = [[0]*self._dx for i in range(self._dy)]
         for y in range(self._dy):
             for x in range(self._dx):
-                temp[y][x] = self._array[y][x] + other._array[y][x]                
+                temp[y][x] = self._array[y][x] + other._array[y][x]
         return Matrix(temp)
 
     def sum(self):
@@ -115,5 +116,18 @@ class Matrix:
                 return True
         return False
 
+    def rotate_90(self, opt):  # opt == 0 : rotate clockwise, opt == 1 : rotate counter clockwise
+        N = len(self._array)
+        ret = [[0] * N for _ in range(N)]
 
-
+        if(opt == 0):
+            for row in range(N):
+                for column in range(N):
+                    ret[column][N - 1 - row] = self._array[row][column]
+                    
+        elif(opt == 1):
+            for row in range(N):
+                for column in range(N):
+                    ret[N - 1 - column][row] = self._array[row][column]
+                    
+        self._array = ret;
