@@ -18,42 +18,41 @@ def draw_matrix(m):
 ###
 # initialize variables
 ###
-arrayBlk = [[[0, 0, 1, 0],  #I
-            [0, 0, 1, 0],
-            [0, 0, 1, 0],
-            [0, 0, 1, 0]],
+arrayBlk = [[[0, 0, 1, 0],  # I
+             [0, 0, 1, 0],
+             [0, 0, 1, 0],
+             [0, 0, 1, 0]],
 
-            [[0, 0, 1, 0],  #J
-            [0, 0, 1, 0],
-            [0, 1, 1, 0],
-            [0, 0, 0, 0]],
-            
-            [[0, 0, 1, 0],  #L
-            [0, 0, 1, 0],
-            [0, 0, 1, 1],
-            [0, 0, 0, 0]],
-            
-            [[0, 1, 1, 0],  #O
-            [0, 1, 1, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]],
-            
-            [[0, 0, 1, 1],  #S
-            [0, 1, 1, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]],
-            
-            [[0, 1, 1, 1],  #T
-            [0, 0, 1, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]],
-            
-            [[0, 1, 1, 0],  #Z
-            [0, 0, 1, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]],
+            [[0, 0, 1, 0],  # J
+             [0, 0, 1, 0],
+             [0, 1, 1, 0],
+             [0, 0, 0, 0]],
+
+            [[0, 0, 1, 0],  # L
+             [0, 0, 1, 0],
+             [0, 0, 1, 1],
+             [0, 0, 0, 0]],
+
+            [[0, 1, 1, 0],  # O
+             [0, 1, 1, 0],
+             [0, 0, 0, 0],
+             [0, 0, 0, 0]],
+
+            [[0, 0, 1, 1],  # S
+             [0, 1, 1, 0],
+             [0, 0, 0, 0],
+             [0, 0, 0, 0]],
+
+            [[0, 1, 1, 1],  # T
+             [0, 0, 1, 0],
+             [0, 0, 0, 0],
+             [0, 0, 0, 0]],
+
+            [[0, 1, 1, 0],  # Z
+             [0, 0, 1, 1],
+             [0, 0, 0, 0],
+             [0, 0, 0, 0]],
             ]
-
 
 
 # integer variables: must always be integer!
@@ -87,11 +86,33 @@ arrayScreen = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 ###
+# additional functions
+###
+
+
+def rotate_90(src, opt):  # opt == 0 : rotate clockwise, opt == 1 : rotate counter clockwise
+    N = len(src._array)
+    ret = [[0] * N for _ in range(N)]
+
+    if(opt == 0):
+        for row in range(N):
+            for column in range(N):
+                ret[column][N - 1 - row] = src._array[row][column]
+
+    elif(opt == 1):
+        for row in range(N):
+            for column in range(N):
+                ret[N - 1 - column][row] = src._array[row][column]
+
+    return ret
+
+
+###
 # prepare the initial screen output
 ###
 iScreen = Matrix(arrayScreen)
 oScreen = Matrix(iScreen)
-currBlk = Matrix(arrayBlk[random.randrange(0,7)])
+currBlk = Matrix(arrayBlk[random.randrange(0, 7)])
 tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
 tempBlk = tempBlk + currBlk
 oScreen.paste(tempBlk, top, left)
@@ -102,11 +123,12 @@ print()
 # execute the loop
 ###
 
-keepDown = 0;
+keepDown = 0
 
 while True:
     if(not keepDown):
-        key = input('Enter a key from [ q (quit), a (left), d (right), s (down), w (rotate), \' \' (drop) ] : ')
+        key = input(
+            'Enter a key from [ q (quit), a (left), d (right), s (down), w (rotate), \' \' (drop) ] : ')
     if key == 'q':
         print('Game terminated...')
         break
@@ -117,7 +139,7 @@ while True:
     elif key == 's':  # move down
         top += 1
     elif key == 'w':  # rotate the block clockwise
-        currBlk.rotate_90(0)
+        currBlk._array = rotate_90(currBlk, 0)
     elif (key == ' ') or (keepDown == 1):  # drop the block
         if(keepDown == 0):
             keepDown = 1
@@ -128,7 +150,8 @@ while True:
         print('Wrong key!!!')
         continue
 
-    tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
+    tempBlk = iScreen.clip(
+        top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
     tempBlk = tempBlk + currBlk
 
     if tempBlk.anyGreaterThan(1):
@@ -140,13 +163,14 @@ while True:
             top -= 1
             newBlockNeeded = True
         elif key == 'w':  # undo: rotate the block counter-clockwise
-            currBlk.rotate_90(1)
+            currBlk._array = rotate_90(currBlk, 1)
         elif key == ' ':  # undo: move up
             top -= 1
             newBlockNeeded = True
             keepDown = 0
 
-        tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
+        tempBlk = iScreen.clip(
+            top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
         tempBlk = tempBlk + currBlk
 
     oScreen = Matrix(iScreen)
@@ -159,8 +183,9 @@ while True:
         top = 0
         left = iScreenDw + iScreenDx//2 - 2
         newBlockNeeded = False
-        currBlk = Matrix(arrayBlk[random.randrange(0,7)])
-        tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
+        currBlk = Matrix(arrayBlk[random.randrange(0, 7)])
+        tempBlk = iScreen.clip(
+            top, left, top+currBlk.get_dy(), left+currBlk.get_dx())
         tempBlk = tempBlk + currBlk
 
         if tempBlk.anyGreaterThan(1):

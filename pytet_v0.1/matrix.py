@@ -115,19 +115,3 @@ class Matrix:
             if len(temp) > 0:
                 return True
         return False
-
-    def rotate_90(self, opt):  # opt == 0 : rotate clockwise, opt == 1 : rotate counter clockwise
-        N = len(self._array)
-        ret = [[0] * N for _ in range(N)]
-
-        if(opt == 0):
-            for row in range(N):
-                for column in range(N):
-                    ret[column][N - 1 - row] = self._array[row][column]
-                    
-        elif(opt == 1):
-            for row in range(N):
-                for column in range(N):
-                    ret[N - 1 - column][row] = self._array[row][column]
-                    
-        self._array = ret;
