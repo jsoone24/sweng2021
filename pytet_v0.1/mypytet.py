@@ -23,35 +23,28 @@ arrayBlk = [[[0, 0, 1, 0],  # I
              [0, 0, 1, 0],
              [0, 0, 1, 0]],
 
-            [[0, 0, 1, 0],  # J
-             [0, 0, 1, 0],
-             [0, 1, 1, 0],
-             [0, 0, 0, 0]],
+            [[0, 1, 0],  # J
+             [0, 1, 0],
+             [1, 1, 0]],
 
-            [[0, 0, 1, 0],  # L
-             [0, 0, 1, 0],
-             [0, 0, 1, 1],
-             [0, 0, 0, 0]],
+            [[0, 1, 0],  # L
+             [0, 1, 0],
+             [0, 1, 1]],
 
-            [[0, 1, 1, 0],  # O
-             [0, 1, 1, 0],
-             [0, 0, 0, 0],
-             [0, 0, 0, 0]],
+            [[1, 1],  # O
+             [1, 1]],
 
-            [[0, 0, 1, 1],  # S
-             [0, 1, 1, 0],
-             [0, 0, 0, 0],
-             [0, 0, 0, 0]],
+            [[0, 1, 1], # S
+             [1, 1, 0],
+             [0, 0, 0]],
 
-            [[0, 1, 1, 1],  # T
-             [0, 0, 1, 0],
-             [0, 0, 0, 0],
-             [0, 0, 0, 0]],
+            [[1, 1, 1],  # T
+             [0, 1, 0],
+             [0, 0, 0]],
 
-            [[0, 1, 1, 0],  # Z
-             [0, 0, 1, 1],
-             [0, 0, 0, 0],
-             [0, 0, 0, 0]],
+            [[1, 1, 0],  # Z
+             [0, 1, 1],
+             [0, 0, 0]],
             ]
 
 
@@ -104,7 +97,7 @@ def rotate_90(src, opt):  # opt == 0 : rotate clockwise, opt == 1 : rotate count
             for column in range(N):
                 ret[N - 1 - column][row] = src._array[row][column]
 
-    return ret
+    return Matrix(ret)
 
 
 ###
@@ -139,7 +132,7 @@ while True:
     elif key == 's':  # move down
         top += 1
     elif key == 'w':  # rotate the block clockwise
-        currBlk._array = rotate_90(currBlk, 0)
+        currBlk = rotate_90(currBlk, 0)
     elif (key == ' ') or (keepDown == 1):  # drop the block
         if(keepDown == 0):
             keepDown = 1
@@ -163,7 +156,7 @@ while True:
             top -= 1
             newBlockNeeded = True
         elif key == 'w':  # undo: rotate the block counter-clockwise
-            currBlk._array = rotate_90(currBlk, 1)
+            currBlk = rotate_90(currBlk, 1)
         elif key == ' ':  # undo: move up
             top -= 1
             newBlockNeeded = True
