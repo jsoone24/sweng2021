@@ -1,38 +1,9 @@
+from tetris import *
 from matrix import *
 from enum import Enum
 
 
-class TetrisState(Enum):
-    Running = 0
-    NewBlock = 1
-    Finished = 2
-# end of class TetrisState():
-
-
-class Tetris():
-    nBlockTypes = 0
-    nBlockDegrees = 0
-    setOfBlockObjects = 0
-    iScreenDw = 0   # larget enough to cover the largest block
-
-    @classmethod
-    def init(cls, setOfBlockArrays):
-        Tetris.nBlockTypes = len(setOfBlockArrays)  # 7 블럭 개수
-        Tetris.nBlockDegrees = len(setOfBlockArrays[0])  # 4 블럭 각도 수
-        Tetris.setOfBlockObjects = [[0] * Tetris.nBlockDegrees for _ in range(Tetris.nBlockTypes)]
-        arrayBlk_maxSize = 0  # 모양중에 제일 큰거 기록
-        for i in range(Tetris.nBlockTypes):
-            if arrayBlk_maxSize <= len(setOfBlockArrays[i][0]):
-                arrayBlk_maxSize = len(setOfBlockArrays[i][0])
-        # larget enough to cover the largest block
-        Tetris.iScreenDw = arrayBlk_maxSize
-
-        for i in range(Tetris.nBlockTypes):
-            for j in range(Tetris.nBlockDegrees):
-                Tetris.setOfBlockObjects[i][j] = Matrix(
-                    setOfBlockArrays[i][j])  # 자신 클래스에 별도 저장
-        return
-
+class CTetris(Tetris):
     def createArrayScreen(self):  # ArrayScreen(배경화면) 초기화
         self.arrayScreenDx = Tetris.iScreenDw * 2 + self.iScreenDx
         self.arrayScreenDy = self.iScreenDy + Tetris.iScreenDw
@@ -51,16 +22,6 @@ class Tetris():
 
         return self.arrayScreen
 
-    def __init__(self, iScreenDy, iScreenDx):  # 게임 화면 크기 설정
-        self.iScreenDy = iScreenDy
-        self.iScreenDx = iScreenDx
-        self.idxBlockDegree = 0
-        arrayScreen = self.createArrayScreen()
-        self.iScreen = Matrix(arrayScreen)  # ArrayScreen(배경) 만들어서 iScreen넣음
-        self.oScreen = Matrix(self.iScreen)  # iScreen으로 oScreen만듬
-        self.justStarted = True
-        return
-
     def accept(self, key):
         self.state = TetrisState.Running
 
@@ -75,13 +36,18 @@ class Tetris():
             self.top = 0
             self.left = Tetris.iScreenDw + self.iScreenDx//2 - self.currBlk.get_dx()//2  # 블럭 어디에 놓을지 위치 선정
             self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
+
+            # binarytempBlk는 겹치는지 감지하기 위해 0과 1로만 계산한 블럭.
+            self.binarytempBlk = self.tempBlk.binary() + self.currBlk.binary()
             # temp block 은 현재 화면에서 잘라온 블럭. currblock은 현재 선택된 블럭
             self.tempBlk = self.tempBlk + self.currBlk
             self.justStarted = False
             print()
 
-            if self.tempBlk.anyGreaterThan(1):  # 넘었는지 체크
+            if self.binarytempBlk.anyGreaterThan(1):  # 넘었는지 체크
                 self.state = TetrisState.Finished
+                self.tempBlk = Matrix([[y % self.nBlockTypes for y in x]for x in self.tempBlk.get_array()])
+
             self.oScreen = Matrix(self.iScreen)
             self.oScreen.paste(self.tempBlk, self.top, self.left)  # 아니면 출력
             return self.state
@@ -97,17 +63,21 @@ class Tetris():
             self.idxBlockDegree = (self.idxBlockDegree + 1) % Tetris.nBlockDegrees
             self.currBlk = Tetris.setOfBlockObjects[self.idxBlockType][self.idxBlockDegree]
         elif key == ' ':  # drop the block
-            while not self.tempBlk.anyGreaterThan(1):
+            while not self.binarytempBlk.anyGreaterThan(1):
                 self.top += 1
                 self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
+
+                self.binarytempBlk = self.tempBlk.binary() + self.currBlk.binary()
                 self.tempBlk = self.tempBlk + self.currBlk
         else:
             print('Wrong key!!!')
 
         self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
+
+        self.binarytempBlk = self.tempBlk.binary() + self.currBlk.binary()
         self.tempBlk = self.tempBlk + self.currBlk
 
-        if self.tempBlk.anyGreaterThan(1):  # 벽 충돌시 undo 수행
+        if self.binarytempBlk.anyGreaterThan(1):  # 벽 충돌시 undo 수행
             if key == 'a':  # undo: move right
                 self.left += 1
             elif key == 'd':  # undo: move left
@@ -116,14 +86,15 @@ class Tetris():
                 self.top -= 1
                 self.state = TetrisState.NewBlock
             elif key == 'w':  # undo: rotate the block counter-clockwise
-                self.idxBlockDegree = (
-                    self.idxBlockDegree - 1) % Tetris.nBlockDegrees
+                self.idxBlockDegree = (self.idxBlockDegree - 1) % Tetris.nBlockDegrees
                 self.currBlk = Tetris.setOfBlockObjects[self.idxBlockType][self.idxBlockDegree]
             elif key == ' ':  # undo: move up
                 self.top -= 1
                 self.state = TetrisState.NewBlock
 
             self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
+
+            self.binarytempBlk = self.tempBlk.binary() + self.currBlk.binary()
             self.tempBlk = self.tempBlk + self.currBlk
 
         self.oScreen = Matrix(self.iScreen)
@@ -132,6 +103,21 @@ class Tetris():
         return self.state
 
     def deleteFullLines(self):
-        return
+        self.top = self.iScreenDy - 1
+        self.left = self.iScreenDw
+        self.tempBlk = self.oScreen.clip(self.top, self.left, self.iScreenDy, self.left + self.iScreenDx)  # 밑에서부터 끌어와서 저장
 
-# end of class Tetris():
+        while self.tempBlk.binary().sum() == self.iScreenDx:  # 값 비교
+            self.top -= 1
+            self.tempBlk = self.oScreen.clip(self.top, self.left, self.top + 1, self.left + self.iScreenDx)  # 한줄도 통과면 나머지 줄도 검사
+
+        if(self.top != (self.iScreenDy - 1)):  # top이 이전과 같지 않으면
+            # 밑에서부터 지우기만함
+            self.black = Matrix([[0] * self.iScreenDx for _ in range(self.iScreenDy-self.top - 1)])
+            self.oScreen.paste(self.black, self.top + 1, self.left)
+
+            # 밑에서부터 지우고 밑으로 내림
+            #self.tempBlk = self.oScreen.clip(0, self.left, self.top + 1, self.left + self.iScreenDx)
+            #self.oScreen.paste(self.tempBlk, self.iScreenDy - self.top - 1, self.left)
+
+        return

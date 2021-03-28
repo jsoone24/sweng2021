@@ -1,6 +1,7 @@
 class MatrixError(Exception):
     pass
 
+
 class Matrix:
     nAlloc = 0
     nFree = 0
@@ -10,7 +11,7 @@ class Matrix:
 
     def get_nFree(self):
         return Matrix.nFree
-    
+
     def get_dy(self):
         return self._dy
 
@@ -29,9 +30,9 @@ class Matrix:
         self._dy = cy
         self._dx = cx
         self._array = [[0]*self._dx for i in range(self._dy)]
-        #print(self.__array)
+        # print(self.__array)
         Matrix.nAlloc += 1
-        
+
     def __init__(self, arg):
         if isinstance(arg, list):
             array = arg
@@ -58,7 +59,6 @@ class Matrix:
     def __str__(self):
         return 'Matrix(%d, %d)' % (self._dy, self._dx)
 
-
     def print(self):
         print('[', end=' ')
         for y in range(self._dy-1):
@@ -72,18 +72,16 @@ class Matrix:
             print(self._array[self._dy-1][x], end=', ')
         print(self._array[self._dy-1][self._dx-1], end=' ')
         print(']', end=' ')
-        print(']')        
+        print(']')
         return
-
 
     def clip(self, top, left, bottom, right):
         cy = bottom - top
         cx = right - left
-        temp = [[0]*cx for i in range(cy)]       
+        temp = [[0]*cx for i in range(cy)]
         for y in range(cy):
             for x in range(cx):
-                if (top+y >= 0) and (left+x >= 0) \
-                   and (top+y < self._dy) and (left+x < self._dx):
+                if (top+y >= 0) and (left+x >= 0) and (top+y < self._dy) and (left+x < self._dx):
                     temp[y][x] = self._array[top+y][left+x]
                 else:
                     raise MatrixError("invalid matrix range")
@@ -92,12 +90,10 @@ class Matrix:
     def paste(self, other, top, left):
         for y in range(other._dy):
             for x in range(other._dx):
-                if (top+y >= 0) and (left+x >= 0) \
-                   and (top+y < self._dy) and (left+x < self._dx):
+                if (top+y >= 0) and (left+x >= 0) and (top+y < self._dy) and (left+x < self._dx):
                     self._array[top+y][left+x] = other._array[y][x]
                 else:
                     raise MatrixError("invalid matrix range")
-
 
     def __add__(self, other):
         if (self._dx != other._dx) or (self._dy != other._dy):
@@ -105,7 +101,7 @@ class Matrix:
         temp = [[0]*self._dx for i in range(self._dy)]
         for y in range(self._dy):
             for x in range(self._dx):
-                temp[y][x] = self._array[y][x] + other._array[y][x]                
+                temp[y][x] = self._array[y][x] + other._array[y][x]
         return Matrix(temp)
 
     def sum(self):
@@ -135,5 +131,4 @@ class Matrix:
                     temp._array[y][x] = 1
         return temp
 
-### end of Matrix class
-
+# end of Matrix class
