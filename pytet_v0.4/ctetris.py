@@ -4,24 +4,6 @@ from enum import Enum
 
 
 class CTetris(Tetris):
-    def createArrayScreen(self):  # ArrayScreen(배경화면) 초기화
-        self.arrayScreenDx = Tetris.iScreenDw * 2 + self.iScreenDx
-        self.arrayScreenDy = self.iScreenDy + Tetris.iScreenDw
-        self.arrayScreen = [[0] * self.arrayScreenDx for _ in range(self.arrayScreenDy)]
-        for y in range(self.iScreenDy):
-            for x in range(Tetris.iScreenDw):
-                self.arrayScreen[y][x] = 1
-            for x in range(self.iScreenDx):
-                self.arrayScreen[y][Tetris.iScreenDw + x] = 0
-            for x in range(Tetris.iScreenDw):
-                self.arrayScreen[y][Tetris.iScreenDw + self.iScreenDx + x] = 1
-
-        for y in range(Tetris.iScreenDw):
-            for x in range(self.arrayScreenDx):
-                self.arrayScreen[self.iScreenDy + y][x] = 1
-
-        return self.arrayScreen
-
     def accept(self, key):
         self.state = TetrisState.Running
 
@@ -105,19 +87,16 @@ class CTetris(Tetris):
     def deleteFullLines(self):
         self.top = self.iScreenDy - 1
         self.left = self.iScreenDw
-        self.tempBlk = self.oScreen.clip(self.top, self.left, self.iScreenDy, self.left + self.iScreenDx)  # 밑에서부터 끌어와서 저장
+        blackBlk = Matrix([[0 for _ in range(self.iScreenDx)]])
+        self.tempBlk = self.oScreen.clip(self.top, self.left, self.top + 1, self.left + self.iScreenDx)  # 밑에서부터 끌어와서 저장
 
-        while self.tempBlk.binary().sum() == self.iScreenDx:  # 값 비교
-            self.top -= 1
+        while self.top > 0:  # 값 비교
+            if(self.tempBlk.binary().sum() == self.iScreenDx):
+                self.tempBlk = self.oScreen.clip(0, self.left, self.top, self.left + self.iScreenDx)
+                self.oScreen.paste(self.tempBlk, 1, self.left)
+                self.oScreen.paste(blackBlk, 0, self.left)
+            else:
+                self.top -= 1
             self.tempBlk = self.oScreen.clip(self.top, self.left, self.top + 1, self.left + self.iScreenDx)  # 한줄도 통과면 나머지 줄도 검사
-
-        if(self.top != (self.iScreenDy - 1)):  # top이 이전과 같지 않으면
-            # 밑에서부터 지우기만함
-            self.black = Matrix([[0] * self.iScreenDx for _ in range(self.iScreenDy-self.top - 1)])
-            self.oScreen.paste(self.black, self.top + 1, self.left)
-
-            # 밑에서부터 지우고 밑으로 내림
-            #self.tempBlk = self.oScreen.clip(0, self.left, self.top + 1, self.left + self.iScreenDx)
-            #self.oScreen.paste(self.tempBlk, self.iScreenDy - self.top - 1, self.left)
-
+        
         return

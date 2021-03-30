@@ -18,7 +18,6 @@ TextColor = [["red", "\033[31m"],
              ["pink", "\033[95m"],
              ["white", "\033[37m"]]
 
-
 # end of dict TextColor():
 
 def clearScreen(numlines=100):
@@ -163,7 +162,7 @@ def processKey(board, key):
     if state != TetrisState.NewBlock:  # 땅에 떨어지지 않은 경우 함수 끝.
         return state
 
-    idxBlockType = 0#randint(0, nBlocks - 1)  # 땅에 떨어져서 새로 블럭을 생성
+    idxBlockType = randint(0, nBlocks - 1)  # 땅에 떨어져서 새로 블럭을 생성
     key = '0' + str(idxBlockType)
     state = board.accept(key)  # accept에서 상태 갱신
 
@@ -182,13 +181,14 @@ if __name__ == "__main__":
     board = CTetris(20, 15)  # 테트리스 게임 크기 설정
     # board는 CTetris Class. 내부의 oScreen, iScreen은 Matrix 객체
 
-    idxBlockType = 0#randint(0, nBlocks - 1)  # 7가지 모양중에 하나 고름
+    idxBlockType = randint(0, nBlocks - 1)  # 7가지 모양중에 하나 고름
     key = '0' + str(idxBlockType)  # string으로 붙임
     state = board.accept(key)  # 키를 화면에 붙임
     printScreen(board)  # 화면에 출력
 
     while True:
         key = readKeyWithTimeOut()  # 시간마다 계속 내려가게 함 시간 지나면
+
         if not key:  # 인터럽트로 인한 제대로 된 키가 리턴되지 않으면 그냥 한칸 내림
             key = 's'
         # print(repr(key))
