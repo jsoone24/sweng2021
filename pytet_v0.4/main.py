@@ -70,14 +70,15 @@ def readKey():
 	return chr(0x10 + ord(c3) - 65)
 
 def readKeyWithTimeOut():
-	registerAlarm(timeout_handler, 1)
-	try:
-		key = readKey()
-		return key
-	except RuntimeError as e:
-		pass # print('readkey() interrupted!')
+    registerAlarm(timeout_handler, 1)   # 1초뒤 인터럽트 걸리게 설정
+    try:
+        key = readKey() # 일단 키를 읽고 잘 리턴되면 키값 리턴
+        unregisterAlarm()
+        return key
+    except RuntimeError as e:   # 1초뒤에 이런 안되면 여기로 빠짐
+        pass # print('readkey() interrupted!')
 
-	return
+    return
  
 def rotate(m_array):
     size = len(m_array)
