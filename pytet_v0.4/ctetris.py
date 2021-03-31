@@ -4,6 +4,24 @@ from enum import Enum
 
 
 class CTetris(Tetris):
+
+    @classmethod
+    def init(cls, setOfBlockArrays):
+        Tetris.nBlockTypes = len(setOfBlockArrays)
+        Tetris.nBlockDegrees = len(setOfBlockArrays[0])
+        Tetris.setOfBlockObjects = [[0] * Tetris.nBlockDegrees for _ in range(Tetris.nBlockTypes)]
+        arrayBlk_maxSize = 0
+        for i in range(Tetris.nBlockTypes):
+            if arrayBlk_maxSize <= len(setOfBlockArrays[i][0]):
+                arrayBlk_maxSize = len(setOfBlockArrays[i][0])
+        Tetris.iScreenDw = arrayBlk_maxSize     # larget enough to cover the largest block
+
+        for i in range(Tetris.nBlockTypes):
+            for j in range(Tetris.nBlockDegrees):
+                temp_array = [[i + 1 if y > 0 else 0 for y in x] for x in setOfBlockArrays[i][j]]
+                Tetris.setOfBlockObjects[i][j] = Matrix(temp_array)
+        return
+
     def accept(self, key):
         self.state = TetrisState.Running
 
