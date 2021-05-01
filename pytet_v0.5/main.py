@@ -9,31 +9,38 @@ import tty
 import termios
 import signal
 
-import threading
-import time
-
-
-
 def clearScreen(numlines=100):
-    if os.name == 'posix':
-        os.system('clear')
-    elif os.name in ['nt', 'dos', 'ce']:
-        os.system('CLS')
-    else:
-        print('\n' * numlines)
-    return
+	if os.name == 'posix':
+		os.system('clear')
+	elif os.name in ['nt', 'dos', 'ce']:
+		os.system('CLS')
+	else:
+		print('\n' * numlines)
+	return
 
 def printScreen(board):
+    TextColor = [
+            ["white", "\033[37m"],
+            ["red", "\033[31m"],
+            ["green", "\033[32m"],
+            ["yellow", "\033[33m"],
+            ["blue", "\033[34m"],
+            ["purple", "\033[35m"],
+            ["cyan", "\033[36m"],
+            ["pink", "\033[95m"]]
+             
     clearScreen()
-    array = board.oScreen.get_array()
+    # board는 CTetris 객체, oScreen은 Matrix 객체 get_array()는 2차원 행렬 리턴
+    array = board.oCScreen.get_array()
 
-    for y in range(board.oScreen.get_dy()-Tetris.iScreenDw):
+    # get_dy()는 세로 길이 리턴, iScreenDW는 테트리스 너비
+    for y in range(board.oCScreen.get_dy() - Tetris.iScreenDw):
         line = ''
-        for x in range(Tetris.iScreenDw, board.oScreen.get_dx()-Tetris.iScreenDw):
+        for x in range(Tetris.iScreenDw, board.oCScreen.get_dx() - Tetris.iScreenDw):
             if array[y][x] == 0:
-                line += '□'
-            elif array[y][x] == 1:
-                line += '■'
+                line += TextColor[0][1] + '□'
+            elif array[y][x] >= 1:
+                line += TextColor[array[y][x]][1] + '■'
             else:
                 line += 'XX'
         print(line)
@@ -42,19 +49,19 @@ def printScreen(board):
     return
 
 def unregisterAlarm():
-    signal.alarm(0)
-    return
+	signal.alarm(0)
+	return
 
 def registerAlarm(handler, seconds):
-    unregisterAlarm()
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(seconds)
-    return
+	unregisterAlarm()
+	signal.signal(signal.SIGALRM, handler)
+	signal.alarm(seconds)
+	return
 
 def timeout_handler(signum, frame): 
-    #print("timeout!")
-    raise RuntimeError ### we have to raise error to wake up any blocking function
-    return
+	#print("timeout!")
+	raise RuntimeError ### we have to raise error to wake up any blocking function
+	return
 
 def getChar():
     fd = sys.stdin.fileno()
