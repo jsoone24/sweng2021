@@ -60,8 +60,7 @@ Matrix *Matrix::clip(int top, int left, int bottom, int right) {
     Matrix *temp = new Matrix(cy, cx);
     for (int y = 0; y < cy; y++) {
         for (int x = 0; x < cx; x++) {
-            if ((top + y >= 0) && (left + x >= 0) &&
-                (top + y < dy) && (left + x < dx))
+            if ((top + y >= 0) && (left + x >= 0) &&                (top + y < dy) && (left + x < dx))
                 temp->array[y][x] = array[top + y][left + x];
             else {
                 cerr << "invalid matrix range";

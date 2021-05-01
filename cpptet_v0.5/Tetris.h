@@ -1,42 +1,65 @@
 #pragma once
 
-#include "Matrix.h"
+#ifndef TETRIS_H
+#define TETRIS_H
 
-enum TetrisState {
-    Running, NewBlock, Finished
+#include "Matrix.h"
+#include <cmath>
+
+enum TetrisState
+{
+    Running,
+    NewBlock,
+    Finished
 };
 // end of class TetrisState():
 
-class Tetris {
-    private:
-    int nBlockTypes = 0
-    int nBlockDegrees = 0
-    int setOfBlockObjects = 0
-    int iScreenDw = 0   //larget enough to cover the largest block
-    arrayScreen
-    arrayScreenDx
-    arrayScreenDy
-    iScreenDx
-    iScreenDy
-    iScreenDw
-    idxBlockType
-    idxBlockDegree
-    iScreen
-    oScreen
-    justStarted
-    state
-    currBlk
-    tempBlk
-    top
-    left
+// todo which is private
+class Tetris
+{
+public:
+    // Static Type Variables
+    static int nBlockTypes;
+    static int nBlockDegrees;
+    static Matrix **setOfBlockObjects;
 
-    public:
-    Tetris(setOfBlockArrays):    // constructor. return nothing
-    ~Tetris();  // deconstructor
-    def createArrayScreen():    // return this.arrayScreen
-     void __init__(int iScreenDy, int iScreenDx):  // return nothing
-     int accept(int key): // return state
-    void deleteFullLines(); // return nothing
+    // Integer Type Variables
+    int iScreenDw = 0;
+    int iScreenDx = 0;
+    int iScreenDy = 0;
+
+    int arrayScreenDx = 0;
+    int arrayScreenDy = 0;
+
+    int idxBlockType = 0;
+    int idxBlockDegree = 0;
+
+    int top = 0;
+    int left = 0;
+
+    // Matrix Type Variables
+    Matrix iScreen;
+    Matrix oScreen;
+    Matrix arrayScreen;
+    Matrix *currBlk;
+    Matrix *tempBlk;
+
+    // Other Type Variables
+    TetrisState state;
+    bool justStarted = 0;
+
+    // Constructor and Destructor
+    Tetris();
+    Tetris(int dy, int dx);
+    ~Tetris();
+    
+    // Methods
+    static void init(int **setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES); // initialize
+    Matrix createArrayScreen();                                                       // return this.arrayScreen
+    TetrisState accept(char key);                                                      // return TetrisState
+    void deleteFullLines();                                                           // return nothing
 };
 
-### end of class Tetris():
+// end of class Tetris():
+
+#endif

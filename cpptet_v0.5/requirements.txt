@@ -12,17 +12,9 @@
 
   . 요구사항5: Tetris class와 CTetris class 안에서 각기 소멸자 함수를 작성하여 'delete board' 문장이 해당 객체를 깔끔하게 제거하도록 코딩함(가령, 클래스 안에서 Matrix 객체들이 사용 중이면, Matrix 객체들도 모두 깔끔하게 제거되어야 함)
 
+Main 할일 : if -> 1 로 변경
+블록 모양 색깔 수정
 
-
-- 채점환경: Ubuntu 18.04 LTS 터미널 환경에서 다음과 같이 실행함 (위 채점 환경에서 실행되지 않으면 0점 처리함)
-
-  $ make 
-
-  $ ./Main.exe 20 10          # 세로 20 x 가로 10 의 배경화면을 생성하라는 의미임
-
-
-
-수고하세요.
-
-<이상>
-
+나머지 수정할거 
+Tetris.h Tetris.cpp
+CTetris.h CTetris.cpp

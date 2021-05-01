@@ -1,4 +1,6 @@
 #pragma once
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <iostream>
 #include <cstdlib>
@@ -52,3 +54,5 @@ public:
 
     Matrix &operator=(const Matrix &obj);
 };
+
+#endif

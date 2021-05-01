@@ -1,128 +1,236 @@
 #include "Tetris.h"
 
-def init(cls, setOfBlockArrays):
-        Tetris.nBlockTypes = len(setOfBlockArrays)
-        Tetris.nBlockDegrees = len(setOfBlockArrays[0])
-        Tetris.setOfBlockObjects = [[0] * Tetris.nBlockDegrees for _ in range(Tetris.nBlockTypes)]
-        arrayBlk_maxSize = 0
-        for i in range(Tetris.nBlockTypes):
-            if arrayBlk_maxSize <= len(setOfBlockArrays[i][0]):
-                arrayBlk_maxSize = len(setOfBlockArrays[i][0])
-        Tetris.iScreenDw = arrayBlk_maxSize     # larget enough to cover the largest block
+int Tetris::nBlockTypes;
+int Tetris::nBlockDegrees;
+Matrix** Tetris::setOfBlockObjects;
 
-        for i in range(Tetris.nBlockTypes):
-            for j in range(Tetris.nBlockDegrees):
-                Tetris.setOfBlockObjects[i][j] = Matrix(setOfBlockArrays[i][j])
-        return
+Tetris::Tetris()
+{
+	iScreenDy = 0;
+	iScreenDx = 0;
+	idxBlockDegree = 0;
+	arrayScreen = createArrayScreen();
+	iScreen = Matrix(arrayScreen);
+	oScreen = Matrix(iScreen);
+	justStarted = true;
+}
 
-    def createArrayScreen(self):
-        self.arrayScreenDx = Tetris.iScreenDw * 2 + self.iScreenDx
-        self.arrayScreenDy = self.iScreenDy + Tetris.iScreenDw
-        self.arrayScreen = [[0] * self.arrayScreenDx for _ in range(self.arrayScreenDy)]
-        for y in range(self.iScreenDy):
-            for x in range(Tetris.iScreenDw):
-                self.arrayScreen[y][x] = 1
-            for x in range(self.iScreenDx):
-                self.arrayScreen[y][Tetris.iScreenDw + x] = 0
-            for x in range(Tetris.iScreenDw):
-                self.arrayScreen[y][Tetris.iScreenDw + self.iScreenDx + x] = 1
+Tetris::Tetris(int dy, int dx)
+{
+	iScreenDy = dy;
+	iScreenDx = dx;
+	iScreenDw = 0;
+	int arrayBlk_maxSize = 0;
+	for (int i = 0; i < nBlockTypes; i++)
+	{
+		if (arrayBlk_maxSize <= Tetris::setOfBlockObjects[i][0].get_dx())
+		{
+			arrayBlk_maxSize = Tetris::setOfBlockObjects[i][0].get_dx();
+		}
+	}
+	iScreenDw = arrayBlk_maxSize;
+	idxBlockDegree = 0;
+	arrayScreen = createArrayScreen();
+	arrayScreen.print();
+	iScreen = Matrix(arrayScreen);
+	oScreen = Matrix(iScreen);
+	justStarted = true;
+}
 
-        for y in range(Tetris.iScreenDw):
-            for x in range(self.arrayScreenDx):
-                self.arrayScreen[self.iScreenDy + y][x] = 1
+Tetris::~Tetris()
+{
+	delete currBlk;
+	delete tempBlk;
+	for (int i = 0; i < Tetris::nBlockTypes; i++)
+	{
+		delete[] setOfBlockObjects[i];
+	}
+	delete[] setOfBlockObjects;
+}
 
-        return self.arrayScreen
+void Tetris::init(int** setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES)
+{
+	Tetris::nBlockTypes = MAX_BLK_TYPES;
+	Tetris::nBlockDegrees = MAX_BLK_DEGREES;
 
-    def __init__(self, iScreenDy, iScreenDx):
-        self.iScreenDy = iScreenDy
-        self.iScreenDx = iScreenDx
-        self.idxBlockDegree = 0
-        arrayScreen = self.createArrayScreen()
-        self.iScreen = Matrix(arrayScreen)
-        self.oScreen = Matrix(self.iScreen)
-        self.justStarted = True
-        return
+	Tetris::setOfBlockObjects = new Matrix * [Tetris::nBlockTypes];
+	for (int i = 0; i < Tetris::nBlockTypes; i++)
+	{
+		Tetris::setOfBlockObjects[i] = new Matrix[Tetris::nBlockDegrees];
+	}
 
-    def accept(self, key):
-        self.state = TetrisState.Running
+	//todo get dy, dx and allocate value
+	for (int i = 0; i < Tetris::nBlockTypes; i++)
+	{
+		for (int j = 0; j < Tetris::nBlockDegrees; j++)
+		{
+			int dx = 0;
+			while (setOfBlockArrays[4 * i + j][dx] != -1)
+			{
+				dx++;
+			}
+			dx = (int)sqrt(dx);
+			Tetris::setOfBlockObjects[i][j] = Matrix(setOfBlockArrays[4 * i + j], dx, dx);
+		}
+	}
+}
 
-        if key >= '0' and key <= '6':
-            if self.justStarted == False:
-                self.deleteFullLines()
-            self.iScreen = Matrix(self.oScreen)
-            self.idxBlockType = int(key)
-            self.idxBlockDegree = 0
-            self.currBlk = Tetris.setOfBlockObjects[self.idxBlockType][self.idxBlockDegree]
-            self.top = 0
-            self.left = Tetris.iScreenDw + self.iScreenDx//2 - self.currBlk.get_dx()//2
-            self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
-            self.tempBlk = self.tempBlk + self.currBlk
-            self.justStarted = False
-            print()
+Matrix Tetris::createArrayScreen()
+{
+	int** array;
+	arrayScreenDx = iScreenDw * 2 + iScreenDx;
+	arrayScreenDy = iScreenDy + iScreenDw;
+	arrayScreen = Matrix(arrayScreenDy, arrayScreenDx);
+	array = arrayScreen.get_array();
 
-            if self.tempBlk.anyGreaterThan(1):
-                self.state = TetrisState.Finished
-            self.oScreen = Matrix(self.iScreen)
-            self.oScreen.paste(self.tempBlk, self.top, self.left)
-            return self.state
-        elif key == 'q':
-            pass
-        elif key == 'a': # move left
-            self.left -= 1
-        elif key == 'd': # move right
-            self.left += 1
-        elif key == 's': # move down
-            self.top += 1
-        elif key == 'w': # rotate the block clockwise
-            self.idxBlockDegree = (self.idxBlockDegree + 1) % Tetris.nBlockDegrees
-            self.currBlk = Tetris.setOfBlockObjects[self.idxBlockType][self.idxBlockDegree]
-        elif key == ' ': # drop the block
-            while not self.tempBlk.anyGreaterThan(1):
-                    self.top += 1
-                    self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
-                    self.tempBlk = self.tempBlk + self.currBlk
-        else:
-            print('Wrong key!!!')
-            
-        self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
-        self.tempBlk = self.tempBlk + self.currBlk
+	for (int y = 0; y < iScreenDy; y++)
+	{
+		for (int x = 0; x < iScreenDw; x++)
+		{
+			array[y][x] = 1;
+		}
+		for (int x = 0; x < iScreenDx; x++)
+		{
+			array[y][iScreenDw + x] = 0;
+		}
+		for (int x = 0; x < iScreenDw; x++)
+		{
+			array[y][iScreenDw + iScreenDx + x] = 1;
+		}
+	}
 
-        if self.tempBlk.anyGreaterThan(1):   ## 벽 충돌시 undo 수행
-            if key == 'a': # undo: move right
-                self.left += 1
-            elif key == 'd': # undo: move left
-                self.left -= 1
-            elif key == 's': # undo: move up
-                self.top -= 1
-                self.state = TetrisState.NewBlock
-            elif key == 'w': # undo: rotate the block counter-clockwise
-                self.idxBlockDegree = (self.idxBlockDegree - 1) % Tetris.nBlockDegrees
-                self.currBlk = Tetris.setOfBlockObjects[self.idxBlockType][self.idxBlockDegree]
-            elif key == ' ': # undo: move up
-                self.top -= 1
-                self.state = TetrisState.NewBlock
-            
-            self.tempBlk = self.iScreen.clip(self.top, self.left, self.top+self.currBlk.get_dy(), self.left+self.currBlk.get_dx())
-            self.tempBlk = self.tempBlk + self.currBlk
+	for (int y = 0; y < iScreenDw; y++)
+	{
+		for (int x = 0; x < arrayScreenDx; x++)
+		{
+			array[iScreenDy + y][x] = 1;
+		}
+	}
 
-        self.oScreen = Matrix(self.iScreen)
-        self.oScreen.paste(self.tempBlk, self.top, self.left)
+	return arrayScreen;
+}
+//todo deallocate used tempBlk, currBlk
+TetrisState Tetris::accept(char key)
+{
+	state = Running;
 
-        return self.state
+	if (key >= '0' && key <= '6')
+	{
+		if (justStarted == false)
+		{
+			deleteFullLines();
+		}
+		iScreen = Matrix(oScreen);
+		idxBlockType = atoi(&key);
+		idxBlockDegree = 0;
+		currBlk = &Tetris::setOfBlockObjects[idxBlockType][idxBlockDegree];
+		top = 0;
+		left = iScreenDw + (int)(iScreenDx / 2) - (int)(currBlk->get_dx() / 2);
+		tempBlk = iScreen.clip(top, left, top + currBlk->get_dy(), left + currBlk->get_dx());
+		tempBlk = tempBlk->add(currBlk);
+		justStarted = false;
 
-    def deleteFullLines(self):
-        self.top = self.iScreenDy - 1
-        self.left = self.iScreenDw
-        blackBlk = Matrix([[0 for _ in range(self.iScreenDx)]])
-        self.tempBlk = self.oScreen.clip(self.top, self.left, self.top + 1, self.left + self.iScreenDx)  # 밑에서부터 끌어와서 저장
+		if (tempBlk->anyGreaterThan(1))
+		{
+			state = Finished;
+		}
+		oScreen = Matrix(iScreen);
+		oScreen.paste(tempBlk, top, left);
 
-        while self.top > 0:  # 값 비교
-            if(self.tempBlk.binary().sum() == self.iScreenDx):
-                self.tempBlk = self.oScreen.clip(0, self.left, self.top, self.left + self.iScreenDx)
-                self.oScreen.paste(self.tempBlk, 1, self.left)
-                self.oScreen.paste(blackBlk, 0, self.left)
-            else:
-                self.top -= 1
-            self.tempBlk = self.oScreen.clip(self.top, self.left, self.top + 1, self.left + self.iScreenDx)  # 한줄도 통과면 나머지 줄도 검사
-        
-        return
+		return state;
+	}
+	else if (key == 'q')
+	{
+	}
+	else if (key == 'a')
+	{ // move left
+		left -= 1;
+	}
+	else if (key == 'd')
+	{ // move right
+		left += 1;
+	}
+	else if (key == 's')
+	{ // move down
+		top += 1;
+	}
+	else if (key == 'w')
+	{ // rotate the block clockwise
+		idxBlockDegree = (idxBlockDegree + 1) % Tetris::nBlockDegrees;
+		currBlk = &Tetris::setOfBlockObjects[idxBlockType][idxBlockDegree];
+	}
+	else if (key == ' ')
+	{ // drop the block
+		while (!(tempBlk->anyGreaterThan(1)))
+		{
+			top += 1;
+			tempBlk = iScreen.clip(top, left, top + currBlk->get_dy(), left + currBlk->get_dx());
+			tempBlk = tempBlk->add(currBlk);
+		}
+	}
+	else
+	{
+		printf("Wrong key!!!\n");
+	}
+
+	tempBlk = iScreen.clip(top, left, top + currBlk->get_dy(), left + currBlk->get_dx());
+	tempBlk = tempBlk->add(currBlk);
+
+	if (tempBlk->anyGreaterThan(1))
+	{ // 벽 충돌시 undo 수행
+		if (key == 'a')
+		{ // undo: move right
+			left += 1;
+		}
+		else if (key == 'd')
+		{ // undo: move left
+			left -= 1;
+		}
+		else if (key == 's')
+		{ // undo: move up
+			top -= 1;
+			state = NewBlock;
+		}
+		else if (key == 'w')
+		{ // undo: rotate the block counter-clockwise
+			idxBlockDegree = (idxBlockDegree - 1) % Tetris::nBlockDegrees;
+			currBlk = &Tetris::setOfBlockObjects[idxBlockType][idxBlockDegree];
+		}
+		else if (key == ' ')
+		{ // undo: move up
+			top -= 1;
+			state = NewBlock;
+		}
+
+		tempBlk = iScreen.clip(top, left, top + currBlk->get_dy(), left + currBlk->get_dx());
+		tempBlk = tempBlk->add(currBlk);
+	}
+
+	oScreen = Matrix(iScreen);
+	oScreen.paste(tempBlk, top, left);
+
+	return state;
+}
+
+void Tetris::deleteFullLines(void)
+{
+	top = iScreenDy - 1;
+	left = iScreenDw;
+	Matrix blackBlk = Matrix(1, iScreenDx);
+	tempBlk = oScreen.clip(top, left, top + 1, left + iScreenDx); // 밑에서부터 끌어와서 저장
+
+	while (top > 0)
+	{ // 값 비교
+		if ((tempBlk->binary())->sum() == iScreenDx)
+		{
+			tempBlk = oScreen.clip(0, left, top, left + iScreenDx);
+			oScreen.paste(tempBlk, 1, left);
+			oScreen.paste(&blackBlk, 0, left);
+		}
+		else
+		{
+			top -= 1;
+		}
+		tempBlk = oScreen.clip(top, left, top + 1, left + iScreenDx); // 한줄도 통과면 나머지 줄도 검사
+	}
+}
