@@ -13,10 +13,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <signal.h>
-
+ 
 #include "CTetris.h"
 
 using namespace std;
+
 
 /**************************************************************/
 /**************** Linux System Functions **********************/
@@ -25,60 +26,59 @@ using namespace std;
 char saved_key = 0;
 int tty_cbreak(int fd);	/* put terminal into cbreak mode */
 int tty_reset(int fd);	/* restore terminal's mode */
-
+  
 /* Read 1 character - echo defines echo mode */
 char getch() {
-    char ch;
-    int n;
-    while (1) {
-        tty_cbreak(0);
-        n = read(0, &ch, 1);
-        tty_reset(0);
-        if (n > 0)
-            break;
-        else if (n < 0) {
-            if (errno == EINTR) {
-                if (saved_key != 0) {
-                    ch = saved_key;
-                    saved_key = 0;
-                    break;
-                }
-            }
-        }
+  char ch;
+  int n;
+  while (1) {
+    tty_cbreak(0);
+    n = read(0, &ch, 1);
+    tty_reset(0);
+    if (n > 0)
+      break;
+    else if (n < 0) {
+      if (errno == EINTR) {
+	if (saved_key != 0) {
+	  ch = saved_key;
+	  saved_key = 0;
+	  break;
+	}
+      }
     }
-    return ch;
+  }
+  return ch;
 }
 
 void sigint_handler(int signo) {
-    // cout << "SIGINT received!" << endl;
-    // do nothing;
+  // cout << "SIGINT received!" << endl;
+  // do nothing;
 }
 
 void sigalrm_handler(int signo) {
-    alarm(1);
-    saved_key = 's';
+  alarm(1);
+  saved_key = 's';
 }
 
 void unregisterAlarm() {
-    alarm(0);
+	alarm(0);
 }
 
 void registerAlarm() {
-    struct sigaction act, oact;
-    act.sa_handler = sigalrm_handler;
-    sigemptyset(&act.sa_mask);
+  struct sigaction act, oact;
+  act.sa_handler = sigalrm_handler;
+  sigemptyset(&act.sa_mask);
 #ifdef SA_INTERRUPT
-    act.sa_flags = SA_INTERRUPT;
+  act.sa_flags = SA_INTERRUPT;
 #else
-    act.sa_flags = 0;
+  act.sa_flags = 0;
 #endif
-    if (sigaction(SIGALRM, &act, &oact) < 0) {
-        cerr << "sigaction error" << endl;
-        exit(1);
-    }
-    alarm(1);
+  if (sigaction(SIGALRM, &act, &oact) < 0) {
+    cerr << "sigaction error" << endl;
+    exit(1);
+  }
+  alarm(1);
 }
-
 
 /**************************************************************/
 /**************** Tetris Blocks Definitions *******************/
@@ -131,19 +131,9 @@ int *setOfCBlockArrays[] = {
     T6D0, T6D1, T6D2, T6D3, // Z
 };
 
+#if 1
 void drawScreen(CTetris *board)
 {
-    string color_black      = "\033[37m";
-    string color_blue       = "\033[34m";
-    string color_green      = "\033[32m";
-    string color_cyan       = "\033[36m";
-    string color_red        = "\033[31m";
-    string color_magenta    = "\033[35m";
-    string color_yellow     = "\033[33m";
-    string color_normal     = "\033[37m";
-    string b_color_black    = "\033[37m";
-    string color_pink       = "\033[95m";
-
     int dy = board->oScreen.get_dy();
     int dx = board->oScreen.get_dx();
     int dw = board->iScreenDw;
@@ -154,76 +144,78 @@ void drawScreen(CTetris *board)
         for (int x = dw - 1; x < dx - dw + 1; x++) {
             if (array[y][x] == 0)
                 cout << color_black << "□ " << color_normal;
-            else if (array[y][x] == 1)
-                cout << color_black << "■ " << color_normal;
             else if (array[y][x] == 2)
-                cout << color_green << "■ " << color_normal;
-            else if (array[y][x] == 3)
-                cout << color_cyan << "■ " << color_normal;
-            else if (array[y][x] == 4)
-                cout << color_blue << "■ " << color_normal;
-            else if (array[y][x] == 5)
-                cout << color_yellow << "■ " << color_normal;
-            else if (array[y][x] == 6)
                 cout << color_red << "■ " << color_normal;
+            else if (array[y][x] == 3)
+                cout << color_green << "■ " << color_normal;
+            else if (array[y][x] == 4)
+                cout << color_yellow << "■ " << color_normal;
+            else if (array[y][x] == 5)
+                cout << color_blue << "■ " << color_normal;
+            else if (array[y][x] == 6)
+                cout << color_purple << "■ " << color_normal;
             else if (array[y][x] == 7)
-                cout << color_magenta << "■ " << color_normal;
+                cout << color_cyan << "■ " << color_normal;
+            else if (array[y][x] == 8)
+                cout << color_pink << "■ " << color_normal;
             else // array[y][x] == 1 // wall
                 cout << b_color_black << "■ " << color_normal;
         }
         cout << endl;
     }
 }
+#endif
 
 /**************************************************************/
 /******************** Tetris Main Loop ************************/
 /**************************************************************/
 
-int main(int argc, char *argv[])
-{
-    int dy, dx;
-    char key = 0;
+int main(int argc, char *argv[]) {
+  int dy, dx;
+  char key = 0;
 
-    if (argc != 3)
-    {
-        cout << "usage: " << argv[0] << " dy dx" << endl;
-        exit(1);
+  if (argc != 3) {
+    cout << "usage: " << argv[0] << " dy dx" << endl;
+    exit(1);
+  }
+  if ((dy = atoi(argv[1])) <= 0 || (dx = atoi(argv[2])) <= 0) {
+    cout << "dy and dx should be greater than 0" << endl;
+    exit(1);
+  }
+
+#if 1
+  CTetris::init(setOfCBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
+  CTetris *board = new CTetris(dy, dx);
+  TetrisState state;
+
+  srand((unsigned int)time(NULL));
+  key = (char)('0' + rand() % MAX_BLK_TYPES);
+#endif
+
+  registerAlarm();
+  while (key != 'q') {
+#if 1
+    state = board->accept(key);
+    if (state == NewBlock) {
+      key = (char)('0' + rand() % MAX_BLK_TYPES);
+      state = board->accept(key);
+      if (state == Finished) {
+	drawScreen(board);
+	cout << endl;
+	break;
+      }
     }
-    if ((dy = atoi(argv[1])) <= 0 || (dx = atoi(argv[2])) <= 0)
-    {
-        cout << "dy and dx should be greater than 0" << endl;
-        exit(1);
-    }
+    drawScreen(board);
+    cout << endl;
+#endif
+    key = getch();
+    cout << key << endl;
+  }
+#if 1
+  delete board;
+#endif
 
-    CTetris::init(setOfCBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
-    CTetris *board = new CTetris(dy, dx);
-    TetrisState state;
-
-    srand((unsigned int)time(NULL));
-    key = (char)('0' + rand() % MAX_BLK_TYPES);
-
-    registerAlarm();
-    while (key != 'q')
-    {
-        state = board->accept(key);
-        if (state == NewBlock)
-        {
-            key = (char)('0' + rand() % MAX_BLK_TYPES);
-            state = board->accept(key);
-            if (state == Finished)
-            {
-                drawScreen(board);
-                cout << endl;
-                break;
-            }
-        }
-        drawScreen(board);
-        cout << endl;
-        key = getch();
-        cout << key << endl;
-    }
-    delete board;
-
-    cout << "Program terminated!" << endl;
-    return 0;
+  cout << "Program terminated!" << endl;
+  return 0;
 }
+

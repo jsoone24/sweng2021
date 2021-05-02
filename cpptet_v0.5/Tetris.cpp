@@ -31,7 +31,6 @@ Tetris::Tetris(int dy, int dx)
 	iScreenDw = arrayBlk_maxSize;
 	idxBlockDegree = 0;
 	arrayScreen = createArrayScreen();
-	arrayScreen.print();
 	iScreen = Matrix(arrayScreen);
 	oScreen = Matrix(iScreen);
 	justStarted = true;
@@ -39,8 +38,6 @@ Tetris::Tetris(int dy, int dx)
 
 Tetris::~Tetris()
 {
-	delete currBlk;
-	delete tempBlk;
 	for (int i = 0; i < Tetris::nBlockTypes; i++)
 	{
 		delete[] setOfBlockObjects[i];
@@ -59,18 +56,17 @@ void Tetris::init(int** setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES
 		Tetris::setOfBlockObjects[i] = new Matrix[Tetris::nBlockDegrees];
 	}
 
-	//todo get dy, dx and allocate value
 	for (int i = 0; i < Tetris::nBlockTypes; i++)
 	{
 		for (int j = 0; j < Tetris::nBlockDegrees; j++)
 		{
 			int dx = 0;
-			while (setOfBlockArrays[4 * i + j][dx] != -1)
+			while (setOfBlockArrays[Tetris::nBlockDegrees * i + j][dx] != -1)
 			{
 				dx++;
 			}
 			dx = (int)sqrt(dx);
-			Tetris::setOfBlockObjects[i][j] = Matrix(setOfBlockArrays[4 * i + j], dx, dx);
+			Tetris::setOfBlockObjects[i][j] = Matrix(setOfBlockArrays[Tetris::nBlockDegrees * i + j], dx, dx);
 		}
 	}
 }
@@ -109,7 +105,6 @@ Matrix Tetris::createArrayScreen()
 
 	return arrayScreen;
 }
-//todo deallocate used tempBlk, currBlk
 TetrisState Tetris::accept(char key)
 {
 	state = Running;
@@ -193,7 +188,7 @@ TetrisState Tetris::accept(char key)
 		}
 		else if (key == 'w')
 		{ // undo: rotate the block counter-clockwise
-			idxBlockDegree = (idxBlockDegree - 1) % Tetris::nBlockDegrees;
+			idxBlockDegree = (idxBlockDegree + 3) % Tetris::nBlockDegrees;
 			currBlk = &Tetris::setOfBlockObjects[idxBlockType][idxBlockDegree];
 		}
 		else if (key == ' ')

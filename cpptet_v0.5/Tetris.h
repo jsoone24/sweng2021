@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef TETRIS_H
-#define TETRIS_H
-
 #include "Matrix.h"
 #include <cmath>
 
@@ -12,9 +9,7 @@ enum TetrisState
     NewBlock,
     Finished
 };
-// end of class TetrisState():
 
-// todo which is private
 class Tetris
 {
 public:
@@ -54,12 +49,8 @@ public:
     ~Tetris();
     
     // Methods
-    static void init(int **setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES); // initialize
-    Matrix createArrayScreen();                                                       // return this.arrayScreen
-    TetrisState accept(char key);                                                      // return TetrisState
-    void deleteFullLines();                                                           // return nothing
+    static void init(int **setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES);
+    Matrix createArrayScreen();
+    TetrisState accept(char key);
+    void deleteFullLines();
 };
-
-// end of class Tetris():
-
-#endif

@@ -8,21 +8,23 @@ CTetris::CTetris(void) : Tetris()
     iCScreen = Matrix(arrayScreen);
     oCScreen = Matrix(iCScreen);
 }
+
 CTetris::CTetris(int dy, int dx) : Tetris(dy, dx)
 {
         arrayScreen = createArrayScreen();
         iCScreen = Matrix(arrayScreen);
         oCScreen = Matrix(iCScreen);
 }
+
 CTetris::~CTetris(void)
 {
-    delete currCBlk;
     for (int i = 0; i < Tetris::nBlockTypes; i++)
     {
         delete[] setOfCBlockObjects[i];
     }
     delete[] setOfCBlockObjects;
 }
+
 void CTetris::init(int **setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREES)
 {
         Tetris::init(setOfBlockArrays, MAX_BLK_TYPES, MAX_BLK_DEGREES);
@@ -33,13 +35,12 @@ void CTetris::init(int **setOfBlockArrays, int MAX_BLK_TYPES, int MAX_BLK_DEGREE
                 CTetris::setOfCBlockObjects[i] = new Matrix[Tetris::nBlockDegrees];
         }
 
-        //todo get dy, dx and allocate value
         for (int i = 0; i < Tetris::nBlockTypes; i++)
         {
                 for (int j = 0; j < Tetris::nBlockDegrees; j++)
                 {
                         CTetris::setOfCBlockObjects[i][j] = Matrix(Tetris::setOfBlockObjects[i][j]);
-                        CTetris::setOfCBlockObjects[i][j].mulc(i + 1);
+                        CTetris::setOfCBlockObjects[i][j].mulc(i + 2);
                 }
         }
 }
