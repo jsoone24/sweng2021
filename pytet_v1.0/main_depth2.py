@@ -271,6 +271,7 @@ class Model(threading.Thread, Observer, Publisher):
 
         printMsg('%s terminated... Press any key to continue' % self.name)
         time.sleep(1)
+        self.notifyObservers('')
         return
 
 
