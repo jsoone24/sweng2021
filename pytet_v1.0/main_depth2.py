@@ -294,6 +294,14 @@ class View(threading.Thread, Observer):
         self.cv.release()
         return
 
+    def read(self):
+        self.cv.acquire()
+        while len(self.queue) < 1:
+            self.cv.wait()
+        key = self.queue.pop(0)
+        self.cv.release()
+        return key
+
     def run(self):
         global isGameDone
 
@@ -308,11 +316,7 @@ class View(threading.Thread, Observer):
         printWindow(self.window, board.getScreen())
 
         while not isGameDone:
-            self.cv.acquire()
-            while len(self.queue) < 1:
-                self.cv.wait()
-            key = self.queue.pop(0)
-            self.cv.release()
+            key = self.read()
 
             if key == 'q':
                 state = TetrisState.Finished
