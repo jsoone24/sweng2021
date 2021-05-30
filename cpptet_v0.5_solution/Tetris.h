@@ -2,48 +2,57 @@
 #include <vector>
 #include "Matrix.h"
 
-enum TetrisState { Running, NewBlock, Finished };
-
-struct Idx {
-  int x;
-  int y;
-  int z;
+enum TetrisState
+{
+    Running,
+    NewBlock,
+    Finished
 };
 
-struct BlockShape {
-  int type;
-  int degree;
+struct Idx
+{
+    int x;
+    int y;
+    int z;
 };
 
-struct BlockState {
-  int top;
-  int left;
-  BlockShape shape;
+struct BlockShape
+{
+    int type;
+    int degree;
 };
 
-class Tetris {
- public:
-  Tetris(int dy, int dx);
-  static void init(int *setOfBlockArrays[], int blkTypes, int blkDegrees);
-  TetrisState accept(char key);
-  virtual ~Tetris();
-  Matrix* oScreen; 
-  static int iScreenDw;
+struct BlockState
+{
+    int top;
+    int left;
+    BlockShape shape;
+};
 
- protected:
-  int* arrayScreen();
-  void deleteFullLines();
-  vector<int> fullLine;
-  Idx iScreenD;
-  static Matrix** setOfBlockObjects;
-  static BlockShape nBlock;
-  BlockState currBlkState;
-  bool justStarted;
-    
- private:
-  void printSetOfBlock(); //testcode
-  int* tempScreen;
-  Matrix* iScreen;
-  TetrisState state;
-  Matrix currBlk;
+class Tetris
+{
+public:
+    Tetris(int dy, int dx);
+    static void init(int *setOfBlockArrays[], int blkTypes, int blkDegrees);
+    TetrisState accept(char key);
+    virtual ~Tetris();
+    Matrix *oScreen;
+    static int iScreenDw;
+
+protected:
+    int *arrayScreen();
+    void deleteFullLines();
+    vector<int> fullLine;
+    Idx iScreenD;
+    static Matrix **setOfBlockObjects;
+    static BlockShape nBlock;
+    BlockState currBlkState;
+    bool justStarted;
+
+private:
+    void printSetOfBlock(); //testcode
+    int *tempScreen;
+    Matrix *iScreen;
+    TetrisState state;
+    Matrix currBlk;
 };
